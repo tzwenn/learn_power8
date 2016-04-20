@@ -1,0 +1,6 @@
+test1
+*.pyc
+test2
+parsum
+.*.swp
+.*.swo
