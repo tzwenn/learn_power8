@@ -6,6 +6,7 @@ TARGETS = test1 parsum test2
 all: $(TARGETS)
 
 test2.cpp: altivecmm.h
+altivecmm.h: altivecmm_typetable.h
 
 clean:
 	$(RM) *.o

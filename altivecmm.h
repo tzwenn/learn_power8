@@ -4,12 +4,15 @@
 #include <altivec.h>
 #include <ostream>
 
+#include "altivecmm_typetable.h"
+
 namespace altivecmm {
 	
 	template<typename _VecT>
 	class Vec {
 	public:
-		using vectype = _VecT;
+		using typeinfo = typetable<_VecT>;
+		using vectype = typename typeinfo::vectype;
 
 		Vec()
 		{
