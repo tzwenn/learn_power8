@@ -12,7 +12,7 @@
 		struct typetable<%s> {
 			using vectype = __vector %s;
 			enum { elem_count = %d,
-			       elem_size = %d};
+			       elem_bits = %d};
 		};""" % (t, t, e, c) for t, e, c in types)
 
 */
@@ -29,77 +29,77 @@ namespace altivecmm {
 	struct typetable<unsigned char> {
 		using vectype = __vector unsigned char;
 		enum { elem_count = 16,
-			   elem_size = 8};
+			   elem_bits = 8};
 	};
 
 	template <>
 	struct typetable<signed char> {
 		using vectype = __vector signed char;
 		enum { elem_count = 16,
-			   elem_size = 8};
+			   elem_bits = 8};
 	};
 
 	/*template <>
 	struct typetable<bool char> {
 		using vectype = __vector bool char;
 		enum { elem_count = 16,
-			   elem_size = 8};
+			   elem_bits = 8};
 	};*/
 
 	template <>
 	struct typetable<unsigned short> {
 		using vectype = __vector unsigned short;
 		enum { elem_count = 8,
-			   elem_size = 16};
+			   elem_bits = 16};
 	};
 
 	template <>
 	struct typetable<signed short> {
 		using vectype = __vector signed short;
 		enum { elem_count = 8,
-			   elem_size = 16};
+			   elem_bits = 16};
 	};
 	
 	/*template <>
 	struct typetable<bool short> {
 		using vectype = __vector bool short;
 		enum { elem_count = 8,
-			   elem_size = 16};
+			   elem_bits = 16};
 	};*/
 
 	/*template <>
 	struct typetable<__pixel> {
 		using vectype = __vector __pixel;
 		enum { elem_count = 8,
-			   elem_size = 16};
+			   elem_bits = 16};
 	};*/
 
 	template <>
 	struct typetable<unsigned int> {
 		using vectype = __vector unsigned int;
 		enum { elem_count = 4,
-			   elem_size = 32};
+			   elem_bits = 32};
 	};
 
 	template <>
 	struct typetable<signed int> {
 		using vectype = __vector signed int;
 		enum { elem_count = 4,
-			   elem_size = 32};
+			   elem_bits = 32};
 	};
 
 	/*template <>
 	struct typetable<bool int> {
 		using vectype = __vector bool int;
 		enum { elem_count = 4,
-			   elem_size = 32};
+			   elem_bits = 32};
 	};*/
 
 	template <>
 	struct typetable<float> {
 		using vectype = __vector float;
 		enum { elem_count = 4,
-			   elem_size = 32};
+			   elem_bits = 32};
 	};
 
 #if POWER7
@@ -107,7 +107,7 @@ namespace altivecmm {
 	struct typetable<double> {
 		using vectype = __vector double;
 		enum { elem_count = 2,
-			   elem_size = 64};
+			   elem_bits = 64};
 	};
 #endif
 
@@ -116,35 +116,35 @@ namespace altivecmm {
 	struct typetable<unsigned long> {
 		using vectype = __vector unsigned long;
 		enum { elem_count = 2,
-			   elem_size = 64};
+			   elem_bits = 64};
 	};
 
 	template <>
 	struct typetable<signed long> {
 		using vectype = __vector signed long;
 		enum { elem_count = 2,
-			   elem_size = 64};
+			   elem_bits = 64};
 	};
 
 	template <>
 	struct typetable<long long> {
 		using vectype = __vector long long;
 		enum { elem_count = 2,
-			   elem_size = 64};
+			   elem_bits = 64};
 	};
 
 	template <>
 	struct typetable<unsigned long long> {
 		using vectype = __vector unsigned long long;
 		enum { elem_count = 2,
-			   elem_size = 64};
+			   elem_bits = 64};
 	};
 
 	/*template <>
 	struct typetable<long bool> {
 		using vectype = __vector long bool;
 		enum { elem_count = 2,
-			   elem_size = 64};
+			   elem_bits = 64};
 	};*/
 #endif
 }
