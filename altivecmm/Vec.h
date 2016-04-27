@@ -1,9 +1,9 @@
 #pragma once
 
-#include <altivec.h>
 #include <ostream>
 
 #include "typetable.h"
+#include <altivec.h>
 
 namespace altivecmm {
 
@@ -14,10 +14,10 @@ namespace altivecmm {
 		using typeinfo = typetable<elemtype>;
 		using vectype = typename typeinfo::vectype;
 
-		Vec(const elemtype * data)
+		Vec(const elemtype * data) :
+			m_d(vec_ld(typeinfo::elem_count, data))
 		{
-			auto d = vec_ld(typeinfo::elem_count, data);
-			m_d = d;
+			;;
 		}
 
 		template<typename S>
@@ -53,6 +53,13 @@ namespace altivecmm {
 			return *this;
 		}
 
+		Vec & operator /=(const Vec & other)
+		{
+			m_d = vec_mul(m_d, other.m_d);
+			return *this;
+		}
+
+
 		////////////////////////////////////
 
 		Vec operator +(const Vec & other) const
@@ -68,6 +75,30 @@ namespace altivecmm {
 		Vec operator *(const Vec & other) const
 		{
 			return vec_mul(m_d, other.m_d);
+		}
+
+		Vec operator /(const Vec & other) const
+		{
+			return vec_div(m_d, other.m_d);
+		}
+
+		////////////////////////////////////
+
+		Vec abs() const
+		{
+			return vec_abs(m_d);
+		}
+
+		//! Returns the saturated absolute values of this vector
+		Vec abss() const
+		{
+			return vec_abss(m_d);
+		}
+
+		//! Returns a vector containing the carry produced by adding this vector
+		Vec add_carry(const Vec & other) const
+		{
+			return vec_addc(m_d, other.m_d);
 		}
 
 		////////////////////////////////////

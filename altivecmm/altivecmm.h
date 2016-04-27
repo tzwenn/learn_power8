@@ -17,5 +17,15 @@ namespace altivecmm {
 		}
 	};
 
+	class Vec2_int64: public Vec<long>
+	{
+	public:
+
+		Vec2_int64(const int64_t r0 = 0, const int64_t r1 = 0) :
+			Vec<long>((vectype) {r0, r1})
+		{
+			;;
+		}
+	};
 }
 

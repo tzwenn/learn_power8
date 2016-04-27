@@ -40,12 +40,20 @@ vector unsigned short test( vector unsigned short a, vector unsigned short b )
   return (mask);
 }
 
+int ld_test()
+{
+	unsigned long data[4] = {0, 1, 2, 3};
+	(void) vec_ld(2, data);
+}
+
 int main(int argc, char *argv[])
 {
 	vector float a = buildVec(1, 2, 3, 4);
 	vector float b = buildVec(4, 3, 2, 1);
 
 	vector float c = vec_add(a, b);
+
+	ld_test();
 
 	printVec(c);
 	puts("");
