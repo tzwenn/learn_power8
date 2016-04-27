@@ -5,7 +5,7 @@
 #include <ostream>
 #include <iostream>
 
-#include "altivecmm_typetable.h"
+#include "typetable.h"
 
 namespace altivecmm {
 	

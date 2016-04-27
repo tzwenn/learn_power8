@@ -17,9 +17,6 @@
 
 */
 
-#define POWER7 1
-#define POWER8 1
-
 namespace altivecmm {
 
 	template<typename T>
@@ -102,16 +99,16 @@ namespace altivecmm {
 			   elem_bits = 32};
 	};
 
-#if POWER7
+#if _ARCH_PWR7
 	template <>
 	struct typetable<double> {
 		using vectype = __vector double;
 		enum { elem_count = 2,
 			   elem_bits = 64};
 	};
-#endif
+#endif // _ARCH_PWR7
 
-#if POWER8
+#if _ARCH_PWR8
 	template <>
 	struct typetable<unsigned long> {
 		using vectype = __vector unsigned long;
@@ -146,5 +143,5 @@ namespace altivecmm {
 		enum { elem_count = 2,
 			   elem_bits = 64};
 	};*/
-#endif
+#endif // _ARCH_PWR8
 }

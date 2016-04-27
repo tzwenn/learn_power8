@@ -13,7 +13,7 @@ if (APPLE)
 endif (APPLE)
 
 
-file(GLOB files_h "*.h")
+file(GLOB files_h "altivecmm/*.h")
 
 add_executable(test1 test1.c)
 add_executable(test2 test2.cpp ${files_h})

@@ -1,19 +1,7 @@
 #include <stdio.h>
 #include <iostream>
 
-#include "altivecmm.h" 
-
-vector unsigned short test( vector unsigned short a, vector unsigned short b ) 
-{
-  const vector unsigned short mask = (vector unsigned short)vec_cmplt( a, b );
-
-  if (vec_all_ge(a, b)) 
-  {
-    return (a);
-  }
-
-  return (mask);
-}
+#include "altivecmm/altivecmm.h"
 
 int main(int argc, char *argv[])
 {
