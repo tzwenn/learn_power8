@@ -83,7 +83,7 @@ namespace altivecmm {
 
 		std::ostream& print(std::ostream & stream) const
 		{
-			stream << "Vec<>(" << m_d[0];
+			stream << "Vec<" << typeinfo::typestr << ">(" << m_d[0];
 			for (int i = 1; i < typeinfo::elem_count; i++)
 				stream << ", " << m_d[i];
 			stream << ")";
