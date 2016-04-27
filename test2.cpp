@@ -12,10 +12,8 @@ int main(int argc, char *argv[])
 
 	altivecmm::Vec<int> v3(values);
 
-	v3.print(std::cout) << std::endl;
-
-	(v2 - v1).print(std::cout) << std::endl;
-	v1.print(std::cout) << std::endl;
+	std::cout << v3 << std::endl;
+	std::cout << v1 + v2 << std::endl;
 
 	return 0;
 }
