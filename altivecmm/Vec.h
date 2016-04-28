@@ -1,9 +1,10 @@
 #pragma once
 
+#include <altivec.h>
 #include <ostream>
 
 #include "typetable.h"
-#include <altivec.h>
+#include "detail/build_vec.h"
 
 namespace altivecmm {
 
@@ -13,6 +14,17 @@ namespace altivecmm {
 	public:
 		using typeinfo = typetable<elemtype>;
 		using vectype = typename typeinfo::vectype;
+
+		template<typename... Args>
+		static Vec construct(Args &&... args)
+		{
+			using typeinfo = typetable<elemtype>;
+			static_assert(!(sizeof...(Args) > typeinfo::elem_count), "Too many arguments for this vector type");
+			static_assert(!(sizeof...(Args) < typeinfo::elem_count),  "Too few arguments for this vector type");
+			return detail::build_vec<typeinfo::elem_count, elemtype>()(args...);
+		}
+
+		////////////////////////////////////
 
 		Vec(const elemtype * data) :
 			m_d(vec_ld(typeinfo::elem_count, data))
