@@ -1,13 +1,16 @@
 set(CMAKE_SYSTEM_NAME Linux)
 
+# Adapt these to match your setup
+set(CROSS_COMPILER_PREFIX /opt/gcc-cross)
+set(CROSS_COMPILER_TARGET powerpc64le-linux-gnu)
+
 set(CMAKE_SYSTEM_PROCESSOR powerpc64le)
 
-set(CMAKE_C_COMPILER /opt/gcc-cross/bin/powerpc64le-linux-gnu-gcc)
-set(CMAKE_CXX_COMPILER /opt/gcc-cross/bin/powerpc64le-linux-gnu-g++)
-set(CMAKE_AR /opt/gcc-cross/bin/powerpc64le-linux-gnu-ar CACHE FILEPATH "Archiver")
+set(CMAKE_C_COMPILER ${CROSS_COMPILER_PREFIX}/bin/${CROSS_COMPILER_TARGET}-gcc)
+set(CMAKE_CXX_COMPILER ${CROSS_COMPILER_PREFIX}/bin/${CROSS_COMPILER_TARGET}-g++)
+set(CMAKE_AR ${CROSS_COMPILER_PREFIX}/bin/${CROSS_COMPILER_TARGET}-ar CACHE FILEPATH "Archiver")
 
-
-set(CMAKE_FIND_ROOT_PATH /opt/gcc-cross/powerpc64le-linux-gnu)
+set(CMAKE_FIND_ROOT_PATH ${CROSS_COMPILER_PREFIX}/${CROSS_COMPILER_TARGET})
 
 SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM ONLY)
 SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
