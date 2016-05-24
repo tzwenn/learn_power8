@@ -9,4 +9,3 @@ namespace altivecmm {
 	using Vec2_uint64 = Vec<unsigned long>;
 
 }
-
