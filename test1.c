@@ -40,7 +40,7 @@ vector unsigned short test( vector unsigned short a, vector unsigned short b )
   return (mask);
 }
 
-int ld_test()
+void ld_test()
 {
 	unsigned long data[4] = {0, 1, 2, 3};
 	(void) vec_ld(2, data);
