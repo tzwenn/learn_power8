@@ -1,6 +1,8 @@
 #pragma once
 
-#define HAZARD_LIST_SHARED_PTR 0
+#ifndef HAZARD_LIST_SHARED_PTR
+#    define HAZARD_LIST_SHARED_PTR 0
+#endif
 
 struct ListEl;
 #if HAZARD_LIST_SHARED_PTR

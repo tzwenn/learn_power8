@@ -1,5 +1,7 @@
 #include "HazardList.h"
 
+#include "stm4pwr.h"
+
 #include <iostream>
 
 struct ListEl
