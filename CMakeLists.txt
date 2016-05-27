@@ -17,4 +17,4 @@ file(GLOB files_h
 add_executable(test1 test1.c)
 add_executable(test2 test2.cpp ${files_h})
 add_executable(parsum parsum.cpp)
-add_executable(stm stm.cpp)
+add_executable(stm stm.cpp HazardList.cpp HazardList.h)
