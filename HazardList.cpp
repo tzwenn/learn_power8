@@ -35,7 +35,8 @@ HazardList::Parity HazardList::oddOrEven(const ListElPtr & el)
 }
 
 HazardList::HazardList() :
-	m_first(new ListEl(0))
+	m_first(new ListEl(0)),
+	m_always_append(false)
 {
 	m_last = m_first;
 }
@@ -43,25 +44,29 @@ HazardList::HazardList() :
 HazardList::~HazardList()
 {
 	#if !HAZARD_LIST_SHARED_PTR
-	ListElPtr next = m_first->next;
-	while (m_first) {
+	while (m_first->next) {
+		ListElPtr next = m_first->next;
 		delete m_first;
-		next = m_first = next->next;
+		m_first = next;
 	}
 	#endif
 }
 
-void HazardList::appendOn(Parity parity)
+#include <thread>
+
+bool HazardList::itIsTimeToAppend(const Parity parity) const
 {
-	while (true) {
-		 __transaction_atomic {
-			//STMLock lock;
-			if (oddOrEven(m_last) == parity) {
-				m_last = ListEl::appendTo(m_last->value + 1, m_last);
-				return;
-			}
-		}
+	return oddOrEven(m_last) == parity;
+}
+
+void HazardList::appendOn(const Parity parity)
+{
+	//stm4pwr::MutexLock lock;
+	while (!(m_always_append || itIsTimeToAppend(parity))) {
+		// std::cout << std::this_thread::get_id() << ": " << !m_always_append << oddOrEven(m_last) << parity << std::endl;
+		;;
 	}
+	m_last = ListEl::appendTo(m_last->value + 1, m_last);
 }
 
 bool HazardList::verify() const
@@ -75,3 +80,13 @@ bool HazardList::verify() const
 	}
 	return true;
 }
+
+void HazardList::print() const
+{
+	std::cout << "HazardList:";
+	for (ListElPtr cur = m_first; cur; cur = cur->next) {
+		std::cout << " " << cur->value;
+	}
+	std::cout << std::endl;
+}
+

@@ -24,9 +24,16 @@ public:
 	HazardList();
 	~HazardList();
 
-	void appendOn(Parity parity);
+	bool itIsTimeToAppend(const Parity parity) const;
+	void appendOn(const Parity parity);
+
 	bool verify() const;
+	void print() const;
+
+	void openForAll()
+	{ m_always_append = true; }
 
 private:
 	ListElPtr m_first, m_last;
+	bool m_always_append;
 };
