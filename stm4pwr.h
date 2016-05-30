@@ -16,10 +16,27 @@ namespace stm4pwr {
 	class STMLock
 	{
 	public:
-		STMLock();
+		STMLock()
+		{
+			begin:
+				asm goto ("tbegin.\n\t"
+							  "beq- %l[failure_hdlr]"
+							  :
+							  :
+							  :
+							  : failure_hdlr);
+				return;
+
+			failure_hdlr:
+				goto begin;
+		}
 
 		void abort();
-		~STMLock();
+
+		~STMLock()
+		{
+			asm volatile ("tend.");
+		}
 	};
 
 	class AtomicTransaction

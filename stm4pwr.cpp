@@ -10,33 +10,10 @@ MutexLock::MutexLock() :
 	;;
 }
 
-STMLock::STMLock()
-{
-	asm volatile ("tbegin.");
-#if 0
-	asm goto ("tbegin.\n\t"
-				  "beq- %l[failure_hdlr]"
-				  :
-				  :
-				  :
-				  : failure_hdlr);
-	return;
-
-	failure_hdlr:
-		throw 1;
-#endif
-}
-
 void STMLock::abort()
 {
 	// asm volatile ("tabort.");
 }
-
-STMLock::~STMLock()
-{
-	asm volatile ("tend.");
-}
-
 
 }
 
