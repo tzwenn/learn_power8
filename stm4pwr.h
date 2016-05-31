@@ -20,11 +20,8 @@ namespace stm4pwr {
 		{
 			begin:
 				asm goto ("tbegin.\n\t"
-							  "beq- %l[failure_hdlr]"
-							  :
-							  :
-							  :
-							  : failure_hdlr);
+						  "beq- %l[failure_hdlr]"
+						   : : : : failure_hdlr);
 				return;
 
 			failure_hdlr:
@@ -36,10 +33,7 @@ namespace stm4pwr {
 			begin:
 				asm goto ("tbegin.\n\t"
 							  "beq- %l[failure_hdlr]"
-							  :
-							  :
-							  :
-							  : failure_hdlr);
+							   : : : : failure_hdlr);
 				return;
 
 			failure_hdlr:
