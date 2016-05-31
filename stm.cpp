@@ -10,7 +10,7 @@ static void busy_wait(const int slowdown_repeats = 1 << 20)
 	for (volatile int i = 0; i < slowdown_repeats; i++);
 }
 
-using Lock = stm4pwr::MutexLock;
+using Lock = stm4pwr::STMLock;
 
 #define __transaction_atomic
 

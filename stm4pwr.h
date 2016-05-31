@@ -31,6 +31,22 @@ namespace stm4pwr {
 				goto begin;
 		}
 
+		STMLock(std::function<bool()> failure_handler)
+		{
+			begin:
+				asm goto ("tbegin.\n\t"
+							  "beq- %l[failure_hdlr]"
+							  :
+							  :
+							  :
+							  : failure_hdlr);
+				return;
+
+			failure_hdlr:
+				if (failure_handler())
+					goto begin;
+		}
+
 		void abort();
 
 		~STMLock()
