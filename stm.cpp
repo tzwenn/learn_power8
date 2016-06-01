@@ -1,12 +1,13 @@
 #include <iostream>
 #include <chrono>
+#include <vector>
 
 #include <condition_variable>
 #include <thread>
 
 #include "stm4pwr.h"
 
-const uint64_t thread_count = 1 << 14;
+const uint64_t thread_count = 1 << 12;//thread_count = 1 << 14;
 
 static void busy_wait(const int slowdown_repeats = 1 << 20)
 {
@@ -37,7 +38,7 @@ private:
 	std::size_t m_count;
 };
 
-using Lock = stm4pwr::MutexLock;
+using Lock = stm4pwr::STMLock;
 
 template<typename T>
 void slow_inc(T *data)
@@ -67,6 +68,19 @@ class DeferredTestThread
 public:
 	DeferredTestThread():
 		m_state(INVALID)
+	{
+		;;
+	}
+
+	DeferredTestThread(const DeferredTestThread & other) :
+		m_state(INVALID)
+	{
+		;;
+	}
+
+	DeferredTestThread(DeferredTestThread && other) :
+		m_state(other.m_state),
+		m_thread(std::move(other.m_thread))
 	{
 		;;
 	}
@@ -103,28 +117,40 @@ int main()
 	auto testFunction = [&]{
 		busy_wait();
 		slow_inc(&test_d);
+		slow_inc(&test_d);
 
 		busy_wait();
+		slow_inc(&test_d);
 		slow_inc(&test_d);
 
 		busy_wait();
 		slow_dec(&test_d);
+		slow_dec(&test_d);
+		slow_dec(&test_d);
 	};
+
+	Barrier startBarrier(thread_count + 1);
+	Barrier endBarrier(thread_count + 1);
+
+	std::vector<DeferredTestThread> thread_pool;
+	thread_pool.reserve(thread_count);
+
+	for (uint64_t i = 0; i < thread_count; i++) {
+		thread_pool.emplace_back(startBarrier, endBarrier, testFunction);
+	}
 
 #if ENABLE_TIMER
 	auto lastTime = std::chrono::high_resolution_clock::now();
 #endif
 
-	#pragma omp parallel for
-	for (uint64_t i = 0; i < thread_count; i++) {
-		testFunction();
-	}
+	startBarrier.wait();
+	endBarrier.wait();
 
 #if ENABLE_TIMER
 	std::chrono::duration<float, std::chrono::milliseconds::period> duration = std::chrono::high_resolution_clock::now() - lastTime;
 
 	std::cout << "Needed " << duration.count() << " milliseconds" << std::endl;
-	std::cout << test_d << " " << thread_count << " (" << thread_count - test_d << " off)" << std::endl;
+	std::cout << test_d << " " << thread_count << " (" << (int64_t) (thread_count - test_d) << " off)" << std::endl;
 	std::cout << (test_d == thread_count ? "[OK]" : "[FAIL]") << std::endl;
 #endif
 
