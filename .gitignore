@@ -5,4 +5,5 @@ parsum
 .*.swp
 .*.swo
 build/
+build-*/
 CMakeLists.txt.user

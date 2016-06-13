@@ -1,4 +1,4 @@
-project(learn_altivec)
+project(learn_power8)
 cmake_minimum_required(VERSION 2.8)
 
 aux_source_directory(. SRC_LIST)
@@ -17,4 +17,8 @@ file(GLOB files_h
 add_executable(test1 test1.c)
 add_executable(test2 test2.cpp ${files_h})
 add_executable(parsum parsum.cpp)
-add_executable(stm stm.cpp stm4pwr.cpp stm4pwr.h)
+add_executable(stm stm.cpp
+	stm4pwr.cpp
+	stm4pwr.h
+	ThreadPool.cpp
+	ThreadPool.h)
