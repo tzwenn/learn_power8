@@ -6,6 +6,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <altivec.h>
 
 
 // basic operations
@@ -15,11 +16,6 @@
 // SHA-224256 functions
 #define Ch(x, y, z)		((x & y) ^ ((~x) & z))
 #define Maj(x, y, z)	((x & y) ^ (x & z) ^ (y & z))
-#define Epsilon_0(x)	(ROTR(x, 2) ^ ROTR(x, 13) ^ ROTR(x, 22))
-#define Epsilon_1(x)	(ROTR(x, 6) ^ ROTR(x, 11) ^ ROTR(x, 25))
-#define Sigma_0(x)		(ROTR(x, 7) ^ ROTR(x, 18) ^ (x >> 3))
-#define Sigma_1(x)		(ROTR(x, 17) ^ ROTR(x, 19) ^ (x >> 10))
-
 
 // SHA-224/256 constants
 const uint32_t K[64] = {
@@ -68,11 +64,42 @@ void sha256_init(uint32_t *H) {
 	H[7] = 0x5be0cd19;
 }
 
+namespace pwr {
+
+	enum {
+		sigma0 = 0,
+		sigma1 = 0xf
+	};
+
+	enum {
+		lowercase = 0,
+		uppercase = 1
+	};
+
+	template<int case_select, int func_select>
+	inline __vector unsigned int sigma(__vector unsigned int x)
+	{
+		return __builtin_crypto_vshasigmaw(x, case_select, func_select);
+	}
+
+	template<int case_select, int func_select>
+	uint32_t sigma(uint32_t x)
+	{
+		__vector unsigned int input = {x, 0, 0, 0};
+		uint32_t output[4] __attribute__((aligned(16)));
+
+		vec_st(sigma<case_select, func_select>(input), 0, output);
+
+		return output[0];
+	}
+
+}
+
 // process block of data (M is in little endian !!!)
 void sha256_process_block(uint32_t *H, unsigned char *m) {
 	uint32_t a, b, c, d, e, f, g, h;
 	uint32_t T1, T2;
-	uint32_t W[64];
+	uint32_t W[64] __attribute__((aligned(16)));
 	
 	unsigned int i;
 
@@ -81,7 +108,7 @@ void sha256_process_block(uint32_t *H, unsigned char *m) {
 		W[i] = m[i*4 + 3] | (m[i*4 + 2] << 8) | (m[i*4 + 1] << 16) | (m[i*4 + 0] << 24);
 	}
 	for (i = 16; i < 64; i++) {
-		W[i] = Sigma_1(W[i-2]) + W[i-7] + Sigma_0(W[i-15]) + W[i-16];
+		W[i] = pwr::sigma<pwr::lowercase, pwr::sigma1>(W[i-2]) + W[i-7] + pwr::sigma<pwr::lowercase, pwr::sigma0>(W[i-15]) + W[i-16];
 	}
 
 	a = H[0];
@@ -94,8 +121,8 @@ void sha256_process_block(uint32_t *H, unsigned char *m) {
 	h = H[7];
 
 	for (i = 0; i < 64; i++) {
-		T1 = h + Epsilon_1(e) + Ch(e, f, g) + K[i] + W[i];
-		T2 = Epsilon_0(a) + Maj(a, b, c);
+		T1 = h + pwr::sigma<pwr::uppercase, pwr::sigma1>(e) + Ch(e, f, g) + K[i] + W[i];
+		T2 = pwr::sigma<pwr::uppercase, pwr::sigma0>(a) + Maj(a, b, c);
 		h = g;
 		g = f;
 		f = e;
