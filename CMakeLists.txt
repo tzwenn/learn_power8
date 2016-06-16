@@ -12,3 +12,4 @@ set(CMAKE_CXX_FLAGS "-std=gnu++11 ${ARCH_FLAGS} ${EXTRA_FLAGS}")
 
 add_subdirectory(vmx)
 add_subdirectory(stm)
+add_subdirectory(crypt)
