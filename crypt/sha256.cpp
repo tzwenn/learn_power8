@@ -6,8 +6,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <altivec.h>
-
+#include "powersha.h"
 
 // basic operations
 #define ROTL(x, n)	((x << n) | (x >> (sizeof(x)*8 - n)))
@@ -62,37 +61,6 @@ void sha256_init(uint32_t *H) {
 	H[5] = 0x9b05688c;
 	H[6] = 0x1f83d9ab;
 	H[7] = 0x5be0cd19;
-}
-
-namespace pwr {
-
-	enum {
-		sigma0 = 0,
-		sigma1 = 0xf
-	};
-
-	enum {
-		lowercase = 0,
-		uppercase = 1
-	};
-
-	template<int case_select, int func_select>
-	inline __vector unsigned int sigma(__vector unsigned int x)
-	{
-		return __builtin_crypto_vshasigmaw(x, case_select, func_select);
-	}
-
-	template<int case_select, int func_select>
-	uint32_t sigma(uint32_t x)
-	{
-		__vector unsigned int input = {x, 0, 0, 0};
-		uint32_t output[4] __attribute__((aligned(16)));
-
-		vec_st(sigma<case_select, func_select>(input), 0, output);
-
-		return output[0];
-	}
-
 }
 
 // process block of data (M is in little endian !!!)
@@ -208,7 +176,7 @@ int main(int argc, char **argv) {
 	sha256_process_block(H, buffer);
 
 	// print hash
-	sha256_print_hash(H, "Final Hash");
+	//sha256_print_hash(H, "Final Hash");
 
 	// convert hash to char array (in correct order)
 	for (i = 0; i < 8; i++) {
@@ -219,7 +187,6 @@ int main(int argc, char **argv) {
 	}
 
 	// print hash
-	printf("Hash:\t");
 	for (i = 0; i < 32; i++) {
 		printf("%02x", buffer[i]);
 	}
