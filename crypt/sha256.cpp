@@ -2,19 +2,10 @@
  *		https://github.com/svenstucki/sha256
  */
 
-#include <stdio.h>
-#include <string.h>
-#include <stdint.h>
-#include <stdbool.h>
+#include <cstdio>
+#include <cstring>
+#include <iostream>
 #include "powersha.h"
-
-// basic operations
-#define ROTL(x, n)	((x << n) | (x >> (sizeof(x)*8 - n)))
-#define ROTR(x, n)	((x >> n) | (x << (sizeof(x)*8 - n)))
-
-// SHA-224256 functions
-#define Ch(x, y, z)		((x & y) ^ ((~x) & z))
-#define Maj(x, y, z)	((x & y) ^ (x & z) ^ (y & z))
 
 // SHA-224/256 constants
 const uint32_t K[64] = {
@@ -68,13 +59,17 @@ void sha256_process_block(uint32_t *H, unsigned char *m) {
 	uint32_t a, b, c, d, e, f, g, h;
 	uint32_t T1, T2;
 	uint32_t W[64] __attribute__((aligned(16)));
-	
+
+	// using shaVec = altivecmm::Vec<uint32_t>;
+
 	unsigned int i;
 
 	// prepare W
 	for (i = 0; i < 16; i++) {
 		W[i] = m[i*4 + 3] | (m[i*4 + 2] << 8) | (m[i*4 + 1] << 16) | (m[i*4 + 0] << 24);
 	}
+
+
 	for (i = 16; i < 64; i++) {
 		W[i] = pwr::sigma<pwr::lowercase, pwr::sigma1>(W[i-2]) + W[i-7] + pwr::sigma<pwr::lowercase, pwr::sigma0>(W[i-15]) + W[i-16];
 	}
@@ -89,8 +84,8 @@ void sha256_process_block(uint32_t *H, unsigned char *m) {
 	h = H[7];
 
 	for (i = 0; i < 64; i++) {
-		T1 = h + pwr::sigma<pwr::uppercase, pwr::sigma1>(e) + Ch(e, f, g) + K[i] + W[i];
-		T2 = pwr::sigma<pwr::uppercase, pwr::sigma0>(a) + Maj(a, b, c);
+		T1 = h + pwr::sigma<pwr::uppercase, pwr::sigma1>(e) + pwr::Ch(e, f, g) + K[i] + W[i];
+		T2 = pwr::sigma<pwr::uppercase, pwr::sigma0>(a) + pwr::Maj(a, b, c);
 		h = g;
 		g = f;
 		f = e;
