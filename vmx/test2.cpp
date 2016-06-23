@@ -31,11 +31,14 @@ int main(int argc, char *argv[])
 	std::cout << (v1 / v2) << std::endl;
 
 	using V32t = altivecmm::Vec<uint32_t>;
-	V32t v3{0x01234567, 2, 0x89abcdef, 3};
-
+	V32t v3{1, 2, 3, 4};
 	V32t permuted = vec_perm(v3.d(), v3.d(), gccfix::gpci(01032));
+	std::cout << permuted << std::endl;
 
-	std::cout << std::hex << permuted << std::endl;
+	V32t vs[4] = {1, 2, 3, 4};
+	for (int i = 0; i < 4; i++) {
+		std::cout << i << " " << vs[i] << std::endl;
+	}
 
 	return 0;
 }

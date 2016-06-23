@@ -1,13 +1,16 @@
 #pragma once
 
 #include <cstdint>
-
 #include <altivecmm/altivecmm.h>
+
+#ifndef ENABLE_QUAD
+#define ENABLE_QUAD 0
+#endif
 
 namespace pwr {
 
-	using vecu32_t = __vector uint32_t;
 	using Vecmm = altivecmm::Vec<uint32_t>;
+	using vecu32_t = Vecmm::vectype;
 
 	enum {
 		sigma0 = 0,
@@ -20,7 +23,7 @@ namespace pwr {
 	};
 
 	template<int case_select, int func_select>
-	inline vecu32_t sigma(vecu32_t x)
+	inline vecu32_t vsigma(vecu32_t x)
 	{
 		return __builtin_crypto_vshasigmaw(x, case_select, func_select);
 	}
@@ -51,18 +54,26 @@ namespace pwr {
 	}
 
 	template<int case_select, int func_select>
-	uint32_t sigma(uint32_t x)
+	Vecmm sigma(Vecmm x)
 	{
-		return unpack(sigma<case_select, func_select>(pack(x)));
+		return __builtin_crypto_vshasigmaw(x.d(), case_select, func_select);
 	}
 
-	static uint32_t Ch(uint32_t x, uint32_t y, uint32_t z)
+	template<int case_select, int func_select>
+	uint32_t sigma(uint32_t x)
+	{
+		return unpack(vsigma<case_select, func_select>(pack(x)));
+	}
+
+#if !ENABLE_QUAD
+	uint32_t Ch(uint32_t x, uint32_t y, uint32_t z)
 	{
 		return unpack(Ch(pack(x), pack(y), pack(z)));
 	}
 
-	static uint32_t Maj(uint32_t x, uint32_t y, uint32_t z)
+	uint32_t Maj(uint32_t x, uint32_t y, uint32_t z)
 	{
 		return unpack(Maj(pack(x), pack(y), pack(z)));
 	}
+#endif
 }

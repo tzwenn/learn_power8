@@ -5,6 +5,8 @@
 #include <cstdio>
 #include <cstring>
 #include <iostream>
+
+#define ENABLE_QUAD 0
 #include "powersha.h"
 
 // SHA-224/256 constants
