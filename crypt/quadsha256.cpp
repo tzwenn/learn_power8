@@ -3,19 +3,14 @@
  */
 
 #include <cstdio>
-#include <cstring>
-#include <cassert>
 #include <iostream>
 
 #include <vector>
 #include <array>
 #include <tuple>
-#include <iomanip>
 
 #include "powersha.h"
 
-
-#include <mutex>
 
 class SHA256Hasher
 {
@@ -64,34 +59,6 @@ public:
 		}
 		puts("");
 #endif
-	}
-
-	void print_buffer(msg_element_t *b, const std::size_t len)
-	{
-#if ENABLE_QUAD
-		for (std::size_t j = 0; j < len; j++) {
-			printf("%02x", std::get<0>(b[j]));
-		}
-		puts("");
-		for (std::size_t j = 0; j < len; j++) {
-			printf("%02x", std::get<1>(b[j]));
-		}
-		puts("");
-		for (std::size_t j = 0; j < len; j++) {
-			printf("%02x", std::get<2>(b[j]));
-		}
-		puts("");
-		for (std::size_t j = 0; j < len; j++) {
-			printf("%02x", std::get<3>(b[j]));
-		}
-		puts("");
-#else
-		for (std::size_t j = 0; j < len; j++) {
-			printf("%02x", b[j]);
-		}
-		puts("");
-#endif
-
 	}
 
 	void calc_final()
@@ -161,29 +128,6 @@ protected:
 			W[i] = msg[i*4 + 3] | (msg[i*4 + 2] << 8) | (msg[i*4 + 1] << 16) | (msg[i*4 + 0] << 24);
 #endif
 		}
-	}
-
-	std::once_flag m_has_printedW;
-	void printW(const block_t & W, const std::size_t start = 0)
-	{
-		std::call_once(m_has_printedW, [&]{
-			std::ios state(NULL);
-			state.copyfmt(std::cout);
-
-			std::cout << std::hex << std::setw(8) << std::setfill('0');
-			for (std::size_t i = start; i < start + 4 && i < W.size(); i++) {
-				std::cout << W[i]
-	#if ENABLE_QUAD
-							 << std::endl;
-	#else
-							 << " ";
-	#endif
-			}
-			std::cout.copyfmt(state);
-	#if !ENABLE_QUAD
-			std::cout << std::endl;
-	#endif
-		});
 	}
 
 	void process_block(const msg_element_t *msg)
