@@ -4,7 +4,7 @@
 #include <altivecmm/altivecmm.h>
 
 #ifndef ENABLE_QUAD
-#define ENABLE_QUAD 0
+#define ENABLE_QUAD 1
 #endif
 
 namespace pwr {

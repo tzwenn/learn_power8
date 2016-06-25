@@ -10,8 +10,12 @@
 #include <vector>
 #include <array>
 #include <tuple>
+#include <iomanip>
 
 #include "powersha.h"
+
+
+#include <mutex>
 
 class SHA256Hasher
 {
@@ -62,6 +66,34 @@ public:
 #endif
 	}
 
+	void print_buffer(msg_element_t *b, const std::size_t len)
+	{
+#if ENABLE_QUAD
+		for (std::size_t j = 0; j < len; j++) {
+			printf("%02x", std::get<0>(b[j]));
+		}
+		puts("");
+		for (std::size_t j = 0; j < len; j++) {
+			printf("%02x", std::get<1>(b[j]));
+		}
+		puts("");
+		for (std::size_t j = 0; j < len; j++) {
+			printf("%02x", std::get<2>(b[j]));
+		}
+		puts("");
+		for (std::size_t j = 0; j < len; j++) {
+			printf("%02x", std::get<3>(b[j]));
+		}
+		puts("");
+#else
+		for (std::size_t j = 0; j < len; j++) {
+			printf("%02x", b[j]);
+		}
+		puts("");
+#endif
+
+	}
+
 	void calc_final()
 	{
 		for (std::size_t i = 0; i + 64 < m_buffer.size(); i += 64) {
@@ -70,8 +102,9 @@ public:
 
 		std::size_t i, len = m_buffer.size() % 64;
 
-		msg_element_t buffer[64];
-		memcpy(buffer, m_buffer.data() + 64 * (m_buffer.size() / 64), len);
+		msg_t buffer(64, splat_el(0x00));
+		auto lastSlice = m_buffer.begin() + 64 * (m_buffer.size() / 64);
+		std::copy(lastSlice, lastSlice + len, buffer.begin());
 
 		if (len < 56) {
 			buffer[len] = splat_el(0x80);
@@ -81,7 +114,7 @@ public:
 			for (i = len + 1; i < 64; i++) {
 				buffer[i] = splat_el(0x00);
 			}
-			process_block(buffer);
+			process_block(buffer.data());
 			i = 0;
 		}
 		for (; i < 56; i++) {
@@ -91,8 +124,8 @@ public:
 		const auto bits = m_buffer.size() * 8;
 		for (i = 0; i < 8; i++) {
 			buffer[63 - i] = splat_el(bits >> (i * 8));
-		}
-		process_block(buffer);
+		}		
+		process_block(buffer.data());
 	}
 
 protected:
@@ -113,7 +146,7 @@ protected:
 		m_hash[7] = 0x5be0cd19;
 	}
 
-	void loadMsg(const msg_element_t *msg, block_t & W)
+	void loadMsgIntoW(const msg_element_t *msg, block_t & W)
 	{
 		for (std::size_t i = 0; i < 16; i++) {
 #if ENABLE_QUAD
@@ -130,6 +163,29 @@ protected:
 		}
 	}
 
+	std::once_flag m_has_printedW;
+	void printW(const block_t & W, const std::size_t start = 0)
+	{
+		std::call_once(m_has_printedW, [&]{
+			std::ios state(NULL);
+			state.copyfmt(std::cout);
+
+			std::cout << std::hex << std::setw(8) << std::setfill('0');
+			for (std::size_t i = start; i < start + 4 && i < W.size(); i++) {
+				std::cout << W[i]
+	#if ENABLE_QUAD
+							 << std::endl;
+	#else
+							 << " ";
+	#endif
+			}
+			std::cout.copyfmt(state);
+	#if !ENABLE_QUAD
+			std::cout << std::endl;
+	#endif
+		});
+	}
+
 	void process_block(const msg_element_t *msg)
 	{
 		field_t a, b, c, d, e, f, g, h;
@@ -138,7 +194,7 @@ protected:
 
 		unsigned int i;
 
-		loadMsg(msg, W);
+		loadMsgIntoW(msg, W);
 
 		for (i = 16; i < 64; i++) {
 			W[i] = pwr::sigma<pwr::lowercase, pwr::sigma1>(W[i-2]) + W[i-7] + pwr::sigma<pwr::lowercase, pwr::sigma0>(W[i-15]) + W[i-16];
