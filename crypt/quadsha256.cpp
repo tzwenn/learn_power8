@@ -9,28 +9,34 @@
 #include <array>
 #include <tuple>
 
+#include <functional>
+#include <chrono>
+
 #include "powersha.h"
 
+class msg_tuple: public std::tuple<uint8_t, uint8_t, uint8_t, uint8_t>
+{
+	using basetype = std::tuple<uint8_t, uint8_t, uint8_t, uint8_t>;
+
+public:
+	msg_tuple(const uint8_t data) :
+		basetype(data, data, data, data)
+	{ }
+
+	msg_tuple(const uint8_t r0, const uint8_t r1, const uint8_t r2, const uint8_t r3) :
+		basetype(r0, r1, r2, r3)
+	{ }
+};
 
 class SHA256Hasher
 {
 public:
 #if ENABLE_QUAD
-	using msg_element_t = std::tuple<uint8_t, uint8_t, uint8_t, uint8_t>;
+	using msg_element_t = msg_tuple;
 	using field_t = pwr::Vecmm;
-
-	static msg_element_t splat_el(const uint8_t data)
-	{
-		return std::make_tuple(data, data, data, data);
-	}
 #else
 	using msg_element_t = uint8_t;
 	using field_t = uint32_t;
-
-	static msg_element_t splat_el(const uint8_t data)
-	{
-		return data;
-	}
 #endif
 	using msg_t = std::vector<msg_element_t>;
 
@@ -69,28 +75,28 @@ public:
 
 		std::size_t i, len = m_buffer.size() % 64;
 
-		msg_t buffer(64, splat_el(0x00));
+		msg_t buffer(64, 0x00);
 		auto lastSlice = m_buffer.begin() + 64 * (m_buffer.size() / 64);
 		std::copy(lastSlice, lastSlice + len, buffer.begin());
 
 		if (len < 56) {
-			buffer[len] = splat_el(0x80);
+			buffer[len] = 0x80;
 			i = len + 1;
 		} else {
-			buffer[len] = splat_el(0x80);
+			buffer[len] = 0x80;
 			for (i = len + 1; i < 64; i++) {
-				buffer[i] = splat_el(0x00);
+				buffer[i] = 0x00;
 			}
 			process_block(buffer.data());
 			i = 0;
 		}
 		for (; i < 56; i++) {
-			buffer[i] = splat_el(0x00);
+			buffer[i] = 0x00;
 		}
 
 		const auto bits = m_buffer.size() * 8;
 		for (i = 0; i < 8; i++) {
-			buffer[63 - i] = splat_el(bits >> (i * 8));
+			buffer[63 - i] = bits >> (i * 8);
 		}		
 		process_block(buffer.data());
 	}
@@ -190,32 +196,54 @@ const SHA256Hasher::field_t SHA256Hasher::K[64] = {
 	0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2,
 };
 
+auto time_it = [](std::function<void()>  f){
+	auto lastTime = std::chrono::high_resolution_clock::now();
+	f();
+	std::chrono::duration<float> d(std::chrono::high_resolution_clock::now() - lastTime);
+	return d.count();
+};
+
 int main(int argc, char *argv[])
 {
 	// Make input fields
-	SHA256Hasher::msg_t input(767, SHA256Hasher::splat_el(42));
+	SHA256Hasher::msg_t input(80, 42);
+	const int repeats = 10000;
+
+	auto calcKHash = [&](double secs, double multer = 4){
+		return (multer * repeats / secs) * 0.001;
+	};
 
 #if ENABLE_QUAD
-	input[0] = std::make_tuple(0, 1, 2, 3);
+	input[0] = msg_tuple(0, 1, 2, 3);
 	SHA256Hasher h(input);
 
-	h.calc_final();
-	h.printhex();
+	std::cout << calcKHash(time_it([&]{
+		for (int i = 0; i < repeats; i++) {
+			h.calc_final();
+		}
+	})) << " khash/s" << std::endl;
+	// h.printhex();
 #else
 	input[0] = 0; SHA256Hasher h0(input);
 	input[0] = 1; SHA256Hasher h1(input);
 	input[0] = 2; SHA256Hasher h2(input);
 	input[0] = 3; SHA256Hasher h3(input);
 
-	h0.calc_final();
-	h1.calc_final();
-	h2.calc_final();
-	h3.calc_final();
+	std::cout << calcKHash(time_it([&]{
+		for (int i = 0; i < repeats; i++) {
+			h0.calc_final();
+			h1.calc_final();
+			h2.calc_final();
+			h3.calc_final();
+		}
+	})) << " khash/s" << std::endl;
 
+/*
 	h0.printhex(); // f59ff41a8c3ddf325b1c0789a15aae114838c2d95a9294642562796e616482da
 	h1.printhex(); // 6a50420aeafcf735705c55ad0776a496db056b2fb78228aa67ce1c8ed8cb918e
 	h2.printhex(); // 6f0bdedb20589983c9f5ae33a4f4e7cc66e617c013eb042961c8d802f0e183c2
 	h3.printhex(); // 101ce26ffd75f4bca024fc565798716c2f768b311221182b440e4c8ce4cbd78e
+*/
 #endif
 }
 

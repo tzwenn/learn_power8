@@ -23,9 +23,9 @@ namespace pwr {
 	};
 
 	template<int case_select, int func_select>
-	inline vecu32_t vsigma(vecu32_t x)
+	Vecmm sigma(Vecmm x)
 	{
-		return __builtin_crypto_vshasigmaw(x, case_select, func_select);
+		return __builtin_crypto_vshasigmaw(x.d(), case_select, func_select);
 	}
 
 	static Vecmm Ch(Vecmm x, Vecmm y, Vecmm z)
@@ -38,42 +38,52 @@ namespace pwr {
 		return (x & y) ^ (x & z) ^ (y & z);
 	}
 
-	//////////////////////////////
-
-	static vecu32_t pack(uint32_t input)
-	{
-		vecu32_t output = {input, 0, 0, 0};
-		return output;
-	}
-
-	static uint32_t unpack(vecu32_t input)
-	{
-		uint32_t output[4] __attribute__((aligned(16)));
-		vec_st(input, 0, output);
-		return output[0];
-	}
-
-	template<int case_select, int func_select>
-	Vecmm sigma(Vecmm x)
-	{
-		return __builtin_crypto_vshasigmaw(x.d(), case_select, func_select);
-	}
-
-	template<int case_select, int func_select>
-	uint32_t sigma(uint32_t x)
-	{
-		return unpack(vsigma<case_select, func_select>(pack(x)));
-	}
-
 #if !ENABLE_QUAD
-	uint32_t Ch(uint32_t x, uint32_t y, uint32_t z)
+	static uint32_t ROTL(uint32_t x, uint32_t n)
 	{
-		return unpack(Ch(pack(x), pack(y), pack(z)));
+		return (x << n) | (x >> (sizeof(x)*8 - n));
 	}
 
-	uint32_t Maj(uint32_t x, uint32_t y, uint32_t z)
+	static uint32_t ROTR(uint32_t x, uint32_t n)
 	{
-		return unpack(Maj(pack(x), pack(y), pack(z)));
+		return (x >> n) | (x << (sizeof(x)*8 - n));
+	}
+
+	template<int case_select, int func_select>
+	uint32_t sigma(const uint32_t x);
+
+	template<>
+	uint32_t sigma<uppercase, sigma0>(const uint32_t x)
+	{
+		return ROTR(x, 2) ^ ROTR(x, 13) ^ ROTR(x, 22);
+	}
+
+	template<>
+	uint32_t sigma<uppercase, sigma1>(const uint32_t x)
+	{
+		return ROTR(x, 6) ^ ROTR(x, 11) ^ ROTR(x, 25);
+	}
+
+	template<>
+	uint32_t sigma<lowercase, sigma0>(const uint32_t x)
+	{
+		return ROTR(x, 7) ^ ROTR(x, 18) ^ (x >> 3);
+	}
+
+	template<>
+	uint32_t sigma<lowercase, sigma1>(const uint32_t x)
+	{
+		return ROTR(x, 17) ^ ROTR(x, 19) ^ (x >> 10);
+	}
+
+	static uint32_t Ch(uint32_t x, uint32_t y, uint32_t z)
+	{
+		return (x & y) ^ ((~x) & z);
+	}
+
+	static uint32_t Maj(uint32_t x, uint32_t y, uint32_t z)
+	{
+		return (x & y) ^ (x & z) ^ (y & z);
 	}
 #endif
 }
