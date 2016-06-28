@@ -97,7 +97,7 @@ public:
 		const auto bits = m_buffer.size() * 8;
 		for (i = 0; i < 8; i++) {
 			buffer[63 - i] = bits >> (i * 8);
-		}		
+		}
 		process_block(buffer.data());
 	}
 
@@ -207,7 +207,7 @@ int main(int argc, char *argv[])
 {
 	// Make input fields
 	SHA256Hasher::msg_t input(80, 42);
-	const int repeats = 10000;
+	const int repeats = 1000;
 
 	auto calcKHash = [&](double secs, double multer = 4){
 		return (multer * repeats / secs) * 0.001;
@@ -218,25 +218,24 @@ int main(int argc, char *argv[])
 	SHA256Hasher h(input);
 
 	std::cout << calcKHash(time_it([&]{
+		#pragma omp parallel
 		for (int i = 0; i < repeats; i++) {
+			SHA256Hasher h(input);
 			h.calc_final();
 		}
-	})) << " khash/s" << std::endl;
+	}))*768 << " khash/s" << std::endl;
 	// h.printhex();
 #else
-	input[0] = 0; SHA256Hasher h0(input);
-	input[0] = 1; SHA256Hasher h1(input);
-	input[0] = 2; SHA256Hasher h2(input);
-	input[0] = 3; SHA256Hasher h3(input);
+	input[0] = 0;
+
 
 	std::cout << calcKHash(time_it([&]{
+		SHA256Hasher h0(input);
+		#pragma omp parallel
 		for (int i = 0; i < repeats; i++) {
 			h0.calc_final();
-			h1.calc_final();
-			h2.calc_final();
-			h3.calc_final();
 		}
-	})) << " khash/s" << std::endl;
+	}), 1)*768 << " khash/s" << std::endl;
 
 /*
 	h0.printhex(); // f59ff41a8c3ddf325b1c0789a15aae114838c2d95a9294642562796e616482da
