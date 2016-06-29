@@ -1,0 +1,3 @@
+[submodule "vmx/altivecmm"]
+	path = vmx/altivecmm
+	url = https://github.com/tzwenn/altivecmm.git
