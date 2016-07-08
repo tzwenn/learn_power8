@@ -215,4 +215,5 @@ int main(int argc, char *argv[])
 	}) * 1000 * 1000 << " µs" << std::endl;
 
 	h0.printhex(); // f59ff41a8c3ddf325b1c0789a15aae114838c2d95a9294642562796e616482da
+	return 0;
 }
