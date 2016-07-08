@@ -207,7 +207,7 @@ int main(int argc, char *argv[])
 {
 	// Make input fields
 	SHA256Hasher::msg_t input(80, 42);
-	const int repeats = 1000;
+	const int repeats = 10000;
 
 	auto calcKHash = [&](double secs, double multer = 4){
 		return (multer * repeats / secs) * 0.001;
@@ -218,13 +218,13 @@ int main(int argc, char *argv[])
 	SHA256Hasher h(input);
 
 	std::cout << calcKHash(time_it([&]{
-		#pragma omp parallel
 		for (int i = 0; i < repeats; i++) {
-			SHA256Hasher h(input);
 			h.calc_final();
 		}
-	}))*768 << " khash/s" << std::endl;
-	// h.printhex();
+	})) << " khash/s" << std::endl;
+
+	//h.calc_final();
+	//h.printhex();
 #else
 	input[0] = 0;
 

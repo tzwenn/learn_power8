@@ -28,14 +28,14 @@ namespace pwr {
 		return __builtin_crypto_vshasigmaw(x.d(), case_select, func_select);
 	}
 
-	static Vecmm Ch(Vecmm x, Vecmm y, Vecmm z)
+	static inline Vecmm Ch(Vecmm b, Vecmm c, Vecmm d)
 	{
-		return (x & y) ^ ((~x) & z);
+		return vec_sel(d.d(), c.d(), b.d());
 	}
 
-	static Vecmm Maj(Vecmm x, Vecmm y, Vecmm z)
+	static inline Vecmm Maj(Vecmm x, Vecmm y, Vecmm z)
 	{
-		return (x & y) ^ (x & z) ^ (y & z);
+		return vec_sel(x.d(), y.d(), vec_xor(x.d(), z.d()));
 	}
 
 #if !ENABLE_QUAD
