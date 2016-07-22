@@ -7,4 +7,4 @@ add_executable(test2 test2.cpp ${altivecmm_files})
 add_executable(parsum parsum.cpp)
 add_executable(instruction_test instruction_test.cpp ${altivecmm_files})
 add_executable(wrapper_inheritence wrapper_inheritence.cpp ${altivecmm_files})
-
+add_executable(condition_test condition_test.cpp ${altivecmm_files})

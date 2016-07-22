@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <iostream>
 #include <altivec.h>
 
 template<typename T>
@@ -20,48 +21,60 @@ public:
 	using vectype = typename typeinfo::vectype;
 
 	BasicWrapper(vectype d) :
-		value(d)
+		m_d(d)
 	{
 		;;
 	}
 
 	template<typename S>
 	BasicWrapper(const BasicWrapper<S> & other) :
-		value(other.value)
+		m_d(other.m_d)
 	{
 		;;
 	}
 
 	operator vectype() const
 	{
-		return value;
+		return m_d;
+	}
+
+	vectype d() const
+	{
+		return m_d;
 	}
 
 	//////////
 
-	vectype value;
+protected:
+	vectype m_d;
 };
 
 //template<typename elemtype>
 template<typename elemtype>
 class Vec: public BasicWrapper<elemtype>
 {
-	using wrapper = BasicWrapper<elemtype>;
+	using baseclass = BasicWrapper<elemtype>;
 public:
-	using wrapper::value;
+	using baseclass::m_d;
 
-	using vectype = typename wrapper::vectype;
-	using typeinfo = typename wrapper::typeinfo;
+	using vectype = typename baseclass::vectype;
+	using typeinfo = typename baseclass::typeinfo;
 
-	Vec(const wrapper & base) :
-		wrapper(base)
+	Vec(vectype v) :
+		baseclass(v)
 	{
 		;;
 	}
 
-	wrapper operator+(const Vec & other)
+	Vec(const baseclass & base) :
+		baseclass(base)
 	{
-		return vec_add(value, other.value);
+		;;
+	}
+
+	Vec operator+(const Vec & other)
+	{
+		return vec_add(m_d, other.m_d);
 	}
 };
 
@@ -80,11 +93,15 @@ int main(int argc, char *argv[])
 	Vec<float> v1(vdata1);
 	Vec<float> v2(vdata2);
 
+#if 0
 	Vec<float> vsum = v1 + v2;
 
 	printVec(vsum);
+#endif
 
-	v1.value = (__vector float){0, 8, 1, 5};
+	//v1.m_d = (__vector float){0, 8, 1, 5};
+
+	Vec<float> eier = static_cast<Vec<float>>(vec_sqrt(v1.d()));
 
 	printVec(v1);
 
