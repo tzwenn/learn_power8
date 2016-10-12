@@ -31,16 +31,14 @@ int main(int argc, char *argv[])
 	std::cout << (v1 / v2) << std::endl;
 
 	using V32t = altivecmm::Vec<uint32_t>;
-	__vector unsigned int v3 = {0x89abcdef, 2, 3, 4};
-	__vector unsigned int v4 = {0x13, 0x13, 0x13, 0x13};
-	__vector unsigned int permuted = vec_slo(v3, altivecmm::Vec<signed char>(4 << 3).d());
+	__vector unsigned int v3 = {1, 2, 3, 4};
+	__vector unsigned int permuted = vec_slo(v3, altivecmm::Vec<signed char>(1 << 3).d());
 	asm volatile ("startlabel: ");
 	//__vector unsigned int permuted = vec_sld(v3, v4, 1);
 	asm volatile ("endlabel: ");
 
-	//std::cout << std::hex << altivecmm::Vec<signed char>(4 << 3) << std::endl;
+	std::cout << std::hex << altivecmm::Vec<signed char>(4 << 3) << std::endl;
 	std::cout << std::hex << V32t(permuted) << std::endl;
-
 
 	return 0;
 }

@@ -48,6 +48,7 @@ void ld_test()
 
 int main(int argc, char *argv[])
 {
+
 	vector float a = buildVec(1, 2, 3, 4);
 	vector float b = buildVec(4, 3, 2, 1);
 
