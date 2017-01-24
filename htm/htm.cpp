@@ -5,7 +5,7 @@
 #include <condition_variable>
 #include <thread>
 
-#include "stm4pwr.h"
+#include "htm4pwr.h"
 #include "ThreadPool.h"
 
 const uint64_t repeats = 1 << 2;
@@ -15,7 +15,7 @@ static void busy_wait(const int slowdown_repeats = 1 << 20)
 	for (volatile int i = 0; i < slowdown_repeats; i++);
 }
 
-using Lock = stm4pwr::MutexLock;
+using Lock = htm4pwr::MutexLock;
 
 template<typename T>
 void slow_inc(T *data)

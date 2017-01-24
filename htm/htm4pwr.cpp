@@ -1,6 +1,6 @@
-#include "stm4pwr.h"
+#include "htm4pwr.h"
 
-namespace stm4pwr {
+namespace htm4pwr {
 
 std::mutex MutexLock::s_mutex;
 
@@ -10,7 +10,7 @@ MutexLock::MutexLock() :
 	;;
 }
 
-void STMLock::abort()
+void HTMLock::abort()
 {
 	// asm volatile ("tabort.");
 }

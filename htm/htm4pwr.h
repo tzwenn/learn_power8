@@ -3,7 +3,7 @@
 #include <mutex>
 #include <functional>
 
-namespace stm4pwr {
+namespace htm4pwr {
 
 	class MutexLock: public std::lock_guard<std::mutex>
 	{
@@ -13,10 +13,10 @@ namespace stm4pwr {
 		MutexLock();
 	};
 
-	class STMLock
+	class HTMLock
 	{
 	public:
-		STMLock()
+		HTMLock()
 		{
 			begin:
 				asm goto ("tbegin.\n\t"
@@ -28,7 +28,7 @@ namespace stm4pwr {
 				goto begin;
 		}
 
-		STMLock(std::function<bool()> failure_handler)
+		HTMLock(std::function<bool()> failure_handler)
 		{
 			begin:
 				asm goto ("tbegin.\n\t"
@@ -43,7 +43,7 @@ namespace stm4pwr {
 
 		void abort();
 
-		~STMLock()
+		~HTMLock()
 		{
 			asm volatile ("tend.");
 		}
