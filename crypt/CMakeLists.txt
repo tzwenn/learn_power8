@@ -14,3 +14,8 @@ add_executable(crc crc.cpp)
 target_include_directories(crc PUBLIC
 		"../vmx"
 	)
+
+add_executable(shaperf shaperf.c)
+target_include_directories(shaperf PUBLIC
+		"../vmx"
+	)

@@ -2,6 +2,9 @@
 
 #include <mutex>
 #include <functional>
+#include <type_traits>
+
+#include <iostream>
 
 namespace htm4pwr {
 
@@ -54,10 +57,16 @@ namespace htm4pwr {
 	public:
 		AtomicTransaction(std::function<void()> f)
 		{
-			MutexLock lock;
+			HTMLock lock;
 			(void)lock;
 			f();
 		}
 	};
 
+	template<class Function, class... Args>
+	typename std::result_of<Function(Args...)>::type atomic(Function&& f, Args&&... args)
+	{
+		HTMLock lock;
+		return f(args...);
+	}
 }

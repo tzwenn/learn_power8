@@ -10,7 +10,7 @@
 
 const uint64_t repeats = 1 << 2;
 
-static void busy_wait(const int slowdown_repeats = 1 << 20)
+static void busy_wait(const int slowdown_repeats = 1 << 10)
 {
 	for (volatile int i = 0; i < slowdown_repeats; i++);
 }
@@ -64,6 +64,7 @@ int main()
 	ThreadPool pool(4, ThreadPool::RUNNING);
 	for (uint64_t i = 0; i < repeats; i++)
 		pool.enqueue(testFunction);
+
 
 #if ENABLE_TIMER
 	auto lastTime = std::chrono::high_resolution_clock::now();

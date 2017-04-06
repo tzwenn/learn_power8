@@ -12,20 +12,26 @@ namespace pwr {
 	using Vecmm = altivecmm::Vec<uint32_t>;
 	using vecu32_t = Vecmm::vectype;
 
-	enum {
-		sigma0 = 0,
-		sigma1 = 0xf
+	enum sigma_index {
+		index0 = 0,
+		index1 = 0xf
 	};
 
-	enum {
+	enum sigma_case {
 		lowercase = 0,
 		uppercase = 1
 	};
 
-	template<int case_select, int func_select>
-	Vecmm sigma(Vecmm x)
+	template<sigma_case case_select, sigma_index index_select>
+	altivecmm::Vec<uint32_t> sigma(altivecmm::Vec<uint32_t> x)
 	{
-		return __builtin_crypto_vshasigmaw(x.d(), case_select, func_select);
+		return __builtin_crypto_vshasigmaw(x.d(), case_select, index_select);
+	}
+
+	template<sigma_case case_select, sigma_index index_select>
+	altivecmm::Vec<uint64_t> sigma(altivecmm::Vec<uint64_t> x)
+	{
+		return __builtin_crypto_vshasigmad(x.d(), case_select, index_select);
 	}
 
 	static inline Vecmm Ch(Vecmm b, Vecmm c, Vecmm d)
@@ -49,29 +55,29 @@ namespace pwr {
 		return (x >> n) | (x << (sizeof(x)*8 - n));
 	}
 
-	template<int case_select, int func_select>
+	template<sigma_case case_select, sigma_index index_select>
 	uint32_t sigma(const uint32_t x);
 
 	template<>
-	uint32_t sigma<uppercase, sigma0>(const uint32_t x)
+	uint32_t sigma<uppercase, index0>(const uint32_t x)
 	{
 		return ROTR(x, 2) ^ ROTR(x, 13) ^ ROTR(x, 22);
 	}
 
 	template<>
-	uint32_t sigma<uppercase, sigma1>(const uint32_t x)
+	uint32_t sigma<uppercase, index1>(const uint32_t x)
 	{
 		return ROTR(x, 6) ^ ROTR(x, 11) ^ ROTR(x, 25);
 	}
 
 	template<>
-	uint32_t sigma<lowercase, sigma0>(const uint32_t x)
+	uint32_t sigma<lowercase, index0>(const uint32_t x)
 	{
 		return ROTR(x, 7) ^ ROTR(x, 18) ^ (x >> 3);
 	}
 
 	template<>
-	uint32_t sigma<lowercase, sigma1>(const uint32_t x)
+	uint32_t sigma<lowercase, index1>(const uint32_t x)
 	{
 		return ROTR(x, 17) ^ ROTR(x, 19) ^ (x >> 10);
 	}

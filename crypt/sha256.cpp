@@ -109,7 +109,7 @@ protected:
 		loadMsgIntoW(msg, W);
 
 		for (i = 16; i < 64; i++) {
-			W[i] = pwr::sigma<pwr::lowercase, pwr::sigma1>(W[i-2]) + W[i-7] + pwr::sigma<pwr::lowercase, pwr::sigma0>(W[i-15]) + W[i-16];
+			W[i] = pwr::sigma<pwr::lowercase, pwr::index1>(W[i-2]) + W[i-7] + pwr::sigma<pwr::lowercase, pwr::index0>(W[i-15]) + W[i-16];
 		}
 
 		a = m_hash[0];
@@ -134,8 +134,8 @@ protected:
 		}
 
 		for (i = 0; i < 64; i++) {
-			T1 = h + pwr::sigma<pwr::uppercase, pwr::sigma1>(e) + pwr::Ch(e, f, g) + K[i] + W[i];
-			T2 = pwr::sigma<pwr::uppercase, pwr::sigma0>(a) + pwr::Maj(a, b, c);
+			T1 = h + pwr::sigma<pwr::uppercase, pwr::index1>(e) + pwr::Ch(e, f, g) + K[i] + W[i];
+			T2 = pwr::sigma<pwr::uppercase, pwr::index0>(a) + pwr::Maj(a, b, c);
 			h = g;
 			g = f;
 			f = e;
