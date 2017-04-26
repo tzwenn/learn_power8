@@ -23,6 +23,24 @@ namespace gccfix {
 
 }
 
+template<typename T>
+struct Foo
+{
+	T d;
+
+	void print()
+	{
+		printf("Hi %d\n", sizeof(d));
+	}
+};
+
+
+template<typename VecT>
+typename VecT::vectype slo(VecT v, int shift)
+{
+	return vec_slo(v, altivecmm::Vec<signed char>(shift << 3).d());
+}
+
 int main(int argc, char *argv[])
 {
 	altivecmm::Vec2_double v1{-1, 2};
@@ -31,13 +49,13 @@ int main(int argc, char *argv[])
 	std::cout << (v1 / v2) << std::endl;
 
 	using V32t = altivecmm::Vec<uint32_t>;
-	__vector unsigned int v3 = {1, 2, 3, 4};
-	__vector unsigned int permuted = vec_slo(v3, altivecmm::Vec<signed char>(1 << 3).d());
+	__vector unsigned int v3 = {0xff000001, 2, 3, 4};
 	asm volatile ("startlabel: ");
+	__vector unsigned int permuted = vec_slo(v3, altivecmm::Vec<signed char>(1 << 3).d());
 	//__vector unsigned int permuted = vec_sld(v3, v4, 1);
 	asm volatile ("endlabel: ");
 
-	std::cout << std::hex << altivecmm::Vec<signed char>(4 << 3) << std::endl;
+	//std::cout << std::hex << altivecmm::Vec<signed char>(4 << 3) << std::endl;
 	std::cout << std::hex << V32t(permuted) << std::endl;
 
 	return 0;

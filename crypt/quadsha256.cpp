@@ -12,6 +12,8 @@
 #include <functional>
 #include <chrono>
 
+#include <omp.h>
+
 #include "powersha.h"
 
 class msg_tuple: public std::tuple<uint8_t, uint8_t, uint8_t, uint8_t>
@@ -140,7 +142,7 @@ protected:
 	{
 		field_t a, b, c, d, e, f, g, h;
 		field_t T1, T2;
-		block_t W; // __attribute__((aligned(16)));
+		block_t W __attribute__((aligned(16)));
 
 		unsigned int i;
 
@@ -206,44 +208,38 @@ auto time_it = [](std::function<void()>  f){
 
 int main(int argc, char *argv[])
 {	
-	// Make input fields
 	SHA256Hasher::msg_t input(80, 42);
-	const int repeats = 10000;
+	const int repeats = 10000000;
+	const double simd_width = sizeof(SHA256Hasher::msg_element_t);
 
-	auto calcKHash = [&](double secs, double multer = 4){
-		return (multer * repeats / secs) * 0.001;
+	auto calcKHash = [&](double secs) {
+		return (simd_width * repeats * 0.001) / secs;
 	};
 
 #if ENABLE_QUAD
 	input[0] = msg_tuple(0, 1, 2, 3);
-	SHA256Hasher h(input);
+#else
+	input[0] = 0;
+#endif
+
+	// Create thread pool to remove overhead in timing measurement below
+	#pragma omp parallel for
+	for (int i = 0; i < omp_get_max_threads(); i++) {
+		asm volatile ("":::"memory");
+	}
+	std::cout << "threads: " << omp_get_max_threads() << std::endl;
+	std::cout << "repeats: " << repeats << std::endl;
+	std::cout << "simd_wd: " << simd_width << std::endl;
+
+	std::vector<SHA256Hasher> hashers(omp_get_max_threads(), SHA256Hasher(input));
 
 	std::cout << calcKHash(time_it([&]{
+		#pragma omp parallel for
 		for (int i = 0; i < repeats; i++) {
-			h.calc_final();
+			hashers[omp_get_thread_num()].calc_final();
 		}
 	})) << " khash/s" << std::endl;
 
-	//h.calc_final();
-	//h.printhex();
-#else
-	input[0] = 0;
-
-
-	std::cout << calcKHash(time_it([&]{
-		SHA256Hasher h0(input);
-		#pragma omp parallel
-		for (int i = 0; i < repeats; i++) {
-			h0.calc_final();
-		}
-	}), 1)*768 << " khash/s" << std::endl;
-
-/*
-	h0.printhex(); // f59ff41a8c3ddf325b1c0789a15aae114838c2d95a9294642562796e616482da
-	h1.printhex(); // 6a50420aeafcf735705c55ad0776a496db056b2fb78228aa67ce1c8ed8cb918e
-	h2.printhex(); // 6f0bdedb20589983c9f5ae33a4f4e7cc66e617c013eb042961c8d802f0e183c2
-	h3.printhex(); // 101ce26ffd75f4bca024fc565798716c2f768b311221182b440e4c8ce4cbd78e
-*/
-#endif
+	return 0;
 }
 

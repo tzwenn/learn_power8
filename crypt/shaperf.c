@@ -130,7 +130,7 @@ void timing_test()
 #if MODE != 1
 		   [0]
 #endif
-		   ); // = 42 !
+		   ); // = 42 :)
 }
 
 int main()
