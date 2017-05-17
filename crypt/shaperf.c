@@ -94,11 +94,13 @@ void functionality_test()
 	printf("power8: %x\n", Sigma0_32_p(vdata)[0]);
 }
 
-#ifndef MODE // 1 = scalar, 2 = vector, 3 = enhanced
+#ifndef MODE // 1 = scalar, 2 = vector, 3 = enhanced, 4 = baseline
 #define MODE 3
 #endif
 
-#define _OP(x, sfx) Maj_32_##sfx  (x, x, x)
+#define _OP(x, sfx) Sigma0_32_##sfx  (x)
+//#define _OP(x, sfx) Ch_32_##sfx  (x, x, x)
+//#define _OP(x, sfx) Maj_32_##sfx  (x, x, x)
 
 #if MODE == 1
 #  define OP(x) _OP((x), s)
@@ -121,9 +123,15 @@ void timing_test()
 
 
 
+	__asm__ volatile ("begin_loop:");
 	for (volatile int i = 0; i < reps; i++) {
+		__asm__ volatile ("begin_op:");
+#if MODE != 4
 		 x = OP(x);
+#endif
+		__asm__ volatile ("end_op:");
 	}
+	__asm__ volatile ("end_loop:");
 
 
 	printf("%d\n", x

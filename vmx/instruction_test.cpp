@@ -50,6 +50,7 @@ int main(int argc, char *argv[])
 {
 	vector float a = {1, 2, 3, 4};
 	vector float b = {4, 3, 2, 1};
+	vector float c;
 
 	asm volatile ("building_vec:");
 	wrapper A(a);
@@ -57,17 +58,26 @@ int main(int argc, char *argv[])
 
 	printf("sizeof(A) = %lu\n", sizeof(A));
 
+	asm volatile ("calling_c:");
+	c = vec_add(a, b);
+	asm volatile ("endcalling_c:");
+	printVec(c);
+
 	asm volatile ("calling_test1_n:");
-	printVec(test1_n(a, b));
+	c = test1_n(a, b);
+	asm volatile ("endcalling_test1_n:");
+	printVec(c);
 
 	asm volatile ("calling_test1_wn:");
-	printVec(test1_wn(a, b));
+	c = test1_wn(a, b);
+	asm volatile ("endcalling_test1_wn:");
+	printVec(c);
 
 	asm volatile ("calling_test1_w:");
-	printVec(test1_w(a, b));
+	c = test1_w(a, b);
+	asm volatile ("endcalling_test1_w:");
+	printVec(c);
 
-
-	printVec(A._d);
 
 	return 0;
 }
